@@ -63,7 +63,7 @@ describe('TOC tree navigation test', () => {
     /**
      * @P2
      * Checks that the font becomes bold
-     * after TOC item is clicked and corresponding page is displayed
+     * after TOC item is clicked and corresponding article is displayed
      * question: is checking the style enough?
      * TODO: leave only one check either by font-weight or by style
      */
@@ -87,7 +87,7 @@ describe('TOC tree navigation test', () => {
      * but it is more correct to compare titles of expanded children as well
      * TODO: compare children titles
      */
-    it('expands after expander click', () => {
+    it('shows children after expander click', () => {
         var selector = "ul[data-test='toc'] li[data-toc-scroll = 'Getting_started']";
         cy.get(selector)
             .as("item").then(() => {
@@ -104,14 +104,14 @@ describe('TOC tree navigation test', () => {
     //@P3
     /**
      *  I have noticed that:
-     *  1. clicking the item with page and children twice doesn't collapse children
+     *  1. clicking the item with article and children twice doesn't collapse children
      *  (but expandes if the item is clicked once)
-     *  2. clicking the item wo page and children twice collapses children
+     *  2. clicking the item wo article and children twice collapses children
      *  but from my point of view 1 and 2 should work the same way
      *  so at the moment I check that clicking the item two times expandes/collapses children
      *  TODO: clarify the behaviour
      */
-    it('expandes/collapses by TOC item', () => {
+    it('hides children after TOC item click', () => {
         var selector = "ul[data-test='toc'] li[data-toc-scroll = 'Getting_started']";
         cy.get(selector).as("item")
             .then(() => {
@@ -190,7 +190,8 @@ describe('TOC tree navigation test', () => {
     });
 
     //@P3
-    it('changes expander icon to opened', () => {
+    //try
+    it('changes expander icon to opened after expander click', () => {
         var selector = "ul[data-test='toc'] li[data-toc-scroll='Getting_started'] a svg";
         cy.get(selector)
             .as("item").then(() => {
@@ -201,7 +202,7 @@ describe('TOC tree navigation test', () => {
     });
 
     //@P3
-    it('returns expander icon to default', () => {
+    it('returns expander icon to default after expander click', () => {
         cy.get("ul[data-test='toc'] li[data-toc-scroll='Getting_started'] a svg")
             .as("item").then(() => {
             cy.get("@item").click().click();
@@ -228,7 +229,7 @@ describe('TOC tree navigation test', () => {
      * @P3
      * @Automate
      */
-    it('opens expander state after TOC item click', () => {
+    it('opens expander after TOC item click', () => {
         //precondition: https://www.jetbrains.com/help/idea/installation-guide.html is opened
         //step1: click on the text of any TOC item
         //expected: expand-collapse icon has opened state
@@ -249,7 +250,7 @@ describe('TOC tree navigation test', () => {
      * @P3
      * @Automate
      */
-    it('checks TOC item font after expander click', () => {
+    it('checks TOC item font after expander-icon click', () => {
         //precondition: https://www.jetbrains.com/help/idea/installation-guide.html is opened
         //step1: click on expander icon left to any TOC item (different from /installation-guide.html)
         //expected: TOC item font doesn't change
@@ -263,10 +264,36 @@ describe('TOC tree navigation test', () => {
      * At the moment first/second TAB-click doesn't show any frame -> looks like low bug
      * The frame has only upper and lower borders though usually it is a rectangle (but may be it is ok)
      */
-    it('checks TAB', () => {
+    it('checks TAB initial state', () => {
         //precondition: https://www.jetbrains.com/help/idea/installation-guide.html is opened
         //step1: click "TAB" button on the keyboard
         //expected: first(?) TOC item is shown in blue frame
+    });
+
+    /**
+     * @P3
+     * @Automate
+     * Try to automate (?? requires some plugin??)
+     */
+    it('checks TAB', () => {
+        //precondition: https://www.jetbrains.com/help/idea/installation-guide.html is opened
+        //step1: click "TAB" button on the keyboard several times
+        //expected: check that TAB highlighting moves from element to element
+    });
+
+    /**
+     * @P3
+     * @Automate
+     * Try to automate (?? requires some plugin??)
+     */
+    it('checks TAB + Enter', () => {
+        //precondition: https://www.jetbrains.com/help/idea/installation-guide.html is opened
+        //step1: click "TAB" button on the keyboard : some TOC element with children is selected
+        //step2: click "Enter" button
+        //expected:
+        //- children are expanded
+        //- TOC item font is bold (selected) (if TOC item has article)
+        //- the corresponding article is shown (if TOC item has article)
     });
 
     /**
@@ -276,21 +303,21 @@ describe('TOC tree navigation test', () => {
     it('checks double click on TOC item', () => {
         //precondition: https://www.jetbrains.com/help/idea/installation-guide.html is opened
         //step1: doubleclick on TOC item
-        //expected: corresponding page is opened, expander icon has default state
+        //expected: corresponding article is opened, expander icon has default state
     });
 
     /**
      * @P3
      * @Automate
      */
-    it('checks double click on expander', () => {
+    it('checks double click on expander-icon', () => {
         //precondition: https://www.jetbrains.com/help/idea/installation-guide.html is opened
         //step1: doubleclick on expander
         //expected: expander icon has default state
     });
 
     //@P3
-    it('checks article after expander-icon click', () => {
+    it('checks article after expander-icon opened', () => {
         var selector = "ul[data-test='toc'] li[data-toc-scroll='Getting_started'] a svg";
         var header = "h1 span span.article__title";
         cy.get(header).then((titleBefore) => {
@@ -305,7 +332,7 @@ describe('TOC tree navigation test', () => {
     });
 
     //@P3
-    it('checks article after expander-icon collapse', () => {
+    it('checks article after expander-icon closed', () => {
         var header = "h1 span span.article__title";
         var selector = "ul[data-test='toc'] li[data-toc-scroll='Getting_started'] a svg";
         cy.get(header).then((sp) => {
@@ -364,7 +391,7 @@ describe('TOC tree navigation test', () => {
         //precondition: https://www.jetbrains.com/help/idea/installation-guide.html is opened
         //step1: Expand Non-JVM Technologies -> PHP -> Debug PHP applications
         // -> Configure a debugging engine -> Configure Xdebug
-        //expected: check that indent = 80px
+        //expected: check that left indent = 80px
     });
 
     /**

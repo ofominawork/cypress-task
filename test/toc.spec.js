@@ -64,10 +64,10 @@ describe('TOC tree navigation test', () => {
      * @P2
      * Checks that the font becomes bold
      * after TOC item is clicked and corresponding page is displayed
-     * question: is checking the style is enough?
+     * question: is checking the style enough?
      * TODO: leave only one check either by font-weight or by style
      */
-    it('changes font to bold', () => {
+    it('changes font to selected', () => {
         var selector = "ul[data-test='toc'] li[data-toc-scroll = 'Getting_started'] a";
         cy.get(selector).as("item")
             .then(() => {
@@ -127,7 +127,7 @@ describe('TOC tree navigation test', () => {
     });
 
     //@P2
-    it('checks page after TOC item wo page click ', () => {
+    it('checks article after TOC item wo article click ', () => {
         var selector = "ul[data-test='toc'] li[data-toc-scroll='d10e258']";
         cy.get(selector).click();
         cy.get('h1 span span.article__title').then((sp) => {
@@ -136,7 +136,7 @@ describe('TOC tree navigation test', () => {
     });
 
     //@P3
-    it('shows children after TOC item wo page click', () => {
+    it('shows children after TOC item wo article click', () => {
         var selector = "ul[data-test='toc'] li[data-toc-scroll = 'd10e258']";
         cy.get(selector).as("item")
             .then(() => {
@@ -150,7 +150,7 @@ describe('TOC tree navigation test', () => {
     });
 
     //@P3
-    it('hides children after TOC item wo page twice click', () => {
+    it('hides children after TOC item wo article click', () => {
         var selector = "ul[data-test='toc'] li[data-toc-scroll = 'd10e258']";
         cy.get(selector).as("item")
             .then(() => {
@@ -165,7 +165,7 @@ describe('TOC tree navigation test', () => {
     });
 
     //@P3
-    it('checks font after TOC item wo page click', () => {
+    it('checks font after TOC item wo article click', () => {
         var selector = "ul[data-test='toc'] li[data-toc-scroll = 'd10e258'] a";
         cy.get(selector).as("item")
             .then(() => {
@@ -190,7 +190,7 @@ describe('TOC tree navigation test', () => {
     });
 
     //@P3
-    it('changes icon to opened', () => {
+    it('changes expander icon to opened', () => {
         var selector = "ul[data-test='toc'] li[data-toc-scroll='Getting_started'] a svg";
         cy.get(selector)
             .as("item").then(() => {
@@ -201,7 +201,7 @@ describe('TOC tree navigation test', () => {
     });
 
     //@P3
-    it('returns icon to default', () => {
+    it('returns expander icon to default', () => {
         cy.get("ul[data-test='toc'] li[data-toc-scroll='Getting_started'] a svg")
             .as("item").then(() => {
             cy.get("@item").click().click();
@@ -211,7 +211,7 @@ describe('TOC tree navigation test', () => {
     });
 
     //@P2
-    it('collapses items', () => {
+    it('collapses children by expander', () => {
         cy.get("ul[data-test='toc'] li[data-toc-scroll = 'Getting_started']")
             .as("item").then(() => {
             cy.get("@item").next().then((nextBefore) => {
@@ -251,7 +251,7 @@ describe('TOC tree navigation test', () => {
      */
     it('checks TOC item font after expander click', () => {
         //precondition: https://www.jetbrains.com/help/idea/installation-guide.html is opened
-        //step1: click on expander icon left to any TOC item
+        //step1: click on expander icon left to any TOC item (different from /installation-guide.html)
         //expected: TOC item font doesn't change
     });
 
@@ -290,7 +290,7 @@ describe('TOC tree navigation test', () => {
     });
 
     //@P3
-    it('checks page after expander-icon click', () => {
+    it('checks article after expander-icon click', () => {
         var selector = "ul[data-test='toc'] li[data-toc-scroll='Getting_started'] a svg";
         var header = "h1 span span.article__title";
         cy.get(header).then((titleBefore) => {
@@ -305,7 +305,7 @@ describe('TOC tree navigation test', () => {
     });
 
     //@P3
-    it('checks page after expander-icon collapse', () => {
+    it('checks article after expander-icon collapse', () => {
         var header = "h1 span span.article__title";
         var selector = "ul[data-test='toc'] li[data-toc-scroll='Getting_started'] a svg";
         cy.get(header).then((sp) => {

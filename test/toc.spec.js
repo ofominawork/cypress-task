@@ -7,12 +7,44 @@ describe('TOC tree navigation test', () => {
         cy.visit('https://www.jetbrains.com/help/idea/installation-guide.html');
     });
 
+    /* TOC tests */
+
     /**
      * @P1
      */
     it('shows TOC', () => {
         cy.get('[data-test=toc]').should('be.visible');
     });
+
+    /**
+     * @P1
+     * @Automate
+     */
+    it('scrolls TOC ', () => {
+        //precondition: https://www.jetbrains.com/help/idea/installation-guide.html is opened
+        //step1: scroll TOC
+        //expected:
+        // - scroll bar appears
+        // - all TOC items can be seen
+    });
+
+    /**
+     * @P3
+     * @Automate
+     * try to automate comparing names of TOC items in the document from which TOC was generated
+     */
+    it('clicks all TOC items', () => {
+        //precondition: https://www.jetbrains.com/help/idea/installation-guide.html is opened
+        //step1: click all TOC items
+        //expected:
+        // - all TOC items are expanded
+        // - all titles of TOC items correspond the document from which TOC was generated
+        // - indents are correct
+        // - items can be scrolled
+    });
+
+
+    /* article tests */
 
     /**
      * @P1
@@ -27,6 +59,47 @@ describe('TOC tree navigation test', () => {
             assert.equal(title.text(), "Getting started");
         });
     });
+
+    //@P2
+    it('shows previous article', () => {
+        var selector = "ul[data-test='toc'] li[data-toc-scroll='d10e258']";
+        cy.get(selector).click();
+        cy.get('h1 span span.article__title').then((sp) => {
+            assert.equal(sp.text(), "Install IntelliJ IDEA");
+        });
+    });
+
+    //@P3
+    it('checks article after expander-icon closed', () => {
+        var header = "h1 span span.article__title";
+        var selector = "ul[data-test='toc'] li[data-toc-scroll='Getting_started'] a svg";
+        cy.get(header).then((sp) => {
+            var before = sp.text();
+            cy.get(selector)
+                .click().click();
+            cy.get(header).then((sp1) => {
+                var after = sp1.text();
+                assert.equal(before, after);
+            });
+        });
+    });
+
+    //@P3
+    it('checks article after expander-icon opened', () => {
+        var selector = "ul[data-test='toc'] li[data-toc-scroll='Getting_started'] a svg";
+        var header = "h1 span span.article__title";
+        cy.get(header).then((titleBefore) => {
+            var before = titleBefore.text();
+            cy.get(selector)
+                .click();
+            cy.get(header).then((titleAfter) => {
+                var after = titleAfter.text();
+                assert.equal(before, after);
+            });
+        });
+    });
+
+    /* children tests */
 
     /**
      * @P1
@@ -46,39 +119,6 @@ describe('TOC tree navigation test', () => {
             });
         });
         //+expected: children titles correspond some document from which TOC is generated
-    });
-
-    /**
-     * @P1
-     * @Automate
-     */
-    it('scrolls TOC ', () => {
-        //precondition: https://www.jetbrains.com/help/idea/installation-guide.html is opened
-        //step1: scroll TOC
-        //expected:
-        // - scroll bar appears
-        // - all TOC items can be seen
-    });
-
-    /**
-     * @P2
-     * Checks that the font becomes bold
-     * after TOC item is clicked and corresponding article is displayed
-     * question: is checking the style enough?
-     * TODO: leave only one check either by font-weight or by style
-     */
-    it('changes font to selected', () => {
-        var selector = "ul[data-test='toc'] li[data-toc-scroll = 'Getting_started'] a";
-        cy.get(selector).as("item")
-            .then(() => {
-                cy.get("@item").should("have.class", "toc-item");
-                cy.get("@item").should('have.css', 'font-weight')
-                    .and('eq', "400");
-                cy.get("@item").click();
-                cy.get("@item").should("have.class", "toc-item toc-item--selected");
-                cy.get("@item").should('have.css', 'font-weight')
-                    .and('eq', "700");
-            });
     });
 
     /**
@@ -126,15 +166,6 @@ describe('TOC tree navigation test', () => {
             });
     });
 
-    //@P2
-    it('checks article after TOC item wo article click ', () => {
-        var selector = "ul[data-test='toc'] li[data-toc-scroll='d10e258']";
-        cy.get(selector).click();
-        cy.get('h1 span span.article__title').then((sp) => {
-            assert.equal(sp.text(), "Install IntelliJ IDEA");
-        });
-    });
-
     //@P3
     it('shows children after TOC item wo article click', () => {
         var selector = "ul[data-test='toc'] li[data-toc-scroll = 'd10e258']";
@@ -164,6 +195,43 @@ describe('TOC tree navigation test', () => {
             });
     });
 
+    //@P2
+    it('hides children after expander click', () => {
+        cy.get("ul[data-test='toc'] li[data-toc-scroll = 'Getting_started']")
+            .as("item").then(() => {
+            cy.get("@item").next().then((nextBefore) => {
+                cy.get("@item").children("a").children("svg").click().click();
+                cy.get("@item").next().then((nextAfter) => {
+                    cy.get("@item").nextUntil(nextBefore).should('have.length', 0);
+                    assert.equal(nextAfter.text(), nextBefore.text());
+                });
+            });
+        });
+    });
+
+    /* font tests */
+
+    /**
+     * @P2
+     * Checks that the font becomes bold
+     * after TOC item is clicked and corresponding article is displayed
+     * question: is checking the style enough?
+     * TODO: leave only one check either by font-weight or by style
+     */
+    it('checks font after TOC item click', () => {
+        var selector = "ul[data-test='toc'] li[data-toc-scroll = 'Getting_started'] a";
+        cy.get(selector).as("item")
+            .then(() => {
+                cy.get("@item").should("have.class", "toc-item");
+                cy.get("@item").should('have.css', 'font-weight')
+                    .and('eq', "400");
+                cy.get("@item").click();
+                cy.get("@item").should("have.class", "toc-item toc-item--selected");
+                cy.get("@item").should('have.css', 'font-weight')
+                    .and('eq', "700");
+            });
+    });
+
     //@P3
     it('checks font after TOC item wo article click', () => {
         var selector = "ul[data-test='toc'] li[data-toc-scroll = 'd10e258'] a";
@@ -179,6 +247,18 @@ describe('TOC tree navigation test', () => {
             });
     });
 
+    /**
+     * @P3
+     * @Automate
+     */
+    it('checks font after expander-icon click', () => {
+        //precondition: https://www.jetbrains.com/help/idea/installation-guide.html is opened
+        //step1: click on expander icon left to any TOC item (different from /installation-guide.html)
+        //expected: TOC item font doesn't change
+    });
+
+    /* hover tests */
+
     //@P3
     /* Should be checked manually
      * Looks like there are problems with hover in cypress
@@ -189,9 +269,11 @@ describe('TOC tree navigation test', () => {
         //expected: grey hover is displayed over the element
     });
 
+    /* expander icon tests */
+
     //@P3
     //try
-    it('changes expander icon to opened after expander click', () => {
+    it('opens expander after expander click', () => {
         var selector = "ul[data-test='toc'] li[data-toc-scroll='Getting_started'] a svg";
         cy.get(selector)
             .as("item").then(() => {
@@ -201,8 +283,10 @@ describe('TOC tree navigation test', () => {
         });
     });
 
+
+
     //@P3
-    it('returns expander icon to default after expander click', () => {
+    it('closes expander after expander click', () => {
         cy.get("ul[data-test='toc'] li[data-toc-scroll='Getting_started'] a svg")
             .as("item").then(() => {
             cy.get("@item").click().click();
@@ -211,19 +295,7 @@ describe('TOC tree navigation test', () => {
         });
     });
 
-    //@P2
-    it('collapses children by expander', () => {
-        cy.get("ul[data-test='toc'] li[data-toc-scroll = 'Getting_started']")
-            .as("item").then(() => {
-            cy.get("@item").next().then((nextBefore) => {
-                cy.get("@item").children("a").children("svg").click().click();
-                cy.get("@item").next().then((nextAfter) => {
-                    cy.get("@item").nextUntil(nextBefore).should('have.length', 0);
-                    assert.equal(nextAfter.text(), nextBefore.text());
-                });
-            });
-        });
-    });
+
 
     /**
      * @P3
@@ -239,22 +311,15 @@ describe('TOC tree navigation test', () => {
      * @P3
      * @Automate
      */
-    it('closes expander after TOC item second click', () => {
+    it('closes expander after TOC item click', () => {
         //precondition: https://www.jetbrains.com/help/idea/installation-guide.html is opened
         //step1: click on the text of any TOC item
         //step2: click on the text of the same TOC item
         //expected: expand-collapse icon has default state
     });
 
-    /**
-     * @P3
-     * @Automate
-     */
-    it('checks TOC item font after expander-icon click', () => {
-        //precondition: https://www.jetbrains.com/help/idea/installation-guide.html is opened
-        //step1: click on expander icon left to any TOC item (different from /installation-guide.html)
-        //expected: TOC item font doesn't change
-    });
+
+    /* TAB tests */
 
     /**
      * @P3
@@ -296,6 +361,9 @@ describe('TOC tree navigation test', () => {
         //- the corresponding article is shown (if TOC item has article)
     });
 
+
+    /* double click tests */
+
     /**
      * @P3
      * @Automate
@@ -316,35 +384,8 @@ describe('TOC tree navigation test', () => {
         //expected: expander icon has default state
     });
 
-    //@P3
-    it('checks article after expander-icon opened', () => {
-        var selector = "ul[data-test='toc'] li[data-toc-scroll='Getting_started'] a svg";
-        var header = "h1 span span.article__title";
-        cy.get(header).then((titleBefore) => {
-            var before = titleBefore.text();
-            cy.get(selector)
-                .click();
-            cy.get(header).then((titleAfter) => {
-                var after = titleAfter.text();
-                assert.equal(before, after);
-            });
-        });
-    });
 
-    //@P3
-    it('checks article after expander-icon closed', () => {
-        var header = "h1 span span.article__title";
-        var selector = "ul[data-test='toc'] li[data-toc-scroll='Getting_started'] a svg";
-        cy.get(header).then((sp) => {
-            var before = sp.text();
-            cy.get(selector)
-                .click().click();
-            cy.get(header).then((sp1) => {
-                var after = sp1.text();
-                assert.equal(before, after);
-            });
-        });
-    });
+    /* indent tests */
 
     //@P3
     //TODO: indent should be checked for all first level items
@@ -394,19 +435,6 @@ describe('TOC tree navigation test', () => {
         //expected: check that left indent = 80px
     });
 
-    /**
-     * @P3
-     * @Automate
-     * try to automate comparing names of TOC items in the document from which TOC was generated
-     */
-    it('clicks all TOC items', () => {
-        //precondition: https://www.jetbrains.com/help/idea/installation-guide.html is opened
-        //step1: click all TOC items
-        //expected:
-        // - all TOC items are expanded
-        // - all titles of TOC items correspond the document from which TOC was generated
-        // - indents are correct
-        // - items can be scrolled
-    });
+
 
 });

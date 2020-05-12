@@ -64,15 +64,15 @@ describe('TOC tree navigation test', () => {
     it("checks article after TOC wo article click", () => {
         var header = "h1 span span.article__title";
         var item = "ul[data-test='toc'] li[data-toc-scroll='d10e258']";
-        elementNotChanged(header, item);
+        assert.isFalse(isArticleChanged(header, item));
     });
 
     //@P3
     it('checks article after expander click', () => {
         var header = "h1 span span.article__title";
         var expander = "ul[data-test='toc'] li[data-toc-scroll='Getting_started'] a svg";
-        elementNotChanged(header, expander);
-        elementNotChanged(header, expander);
+        assert.isFalse(isArticleChanged(header, expander));
+        assert.isFalse(isArticleChanged(header, expander));
     });
 
 
@@ -417,15 +417,23 @@ describe('TOC tree navigation test', () => {
 
     /* functions */
 
-    function elementNotChanged(thisSelector, otherSelector){
+    /**
+     * Change of article is verified by not presence of the same text on the page
+     * @param thisSelector - selector of element which should be checked for presence
+     * @param otherSelector - selector of element which should be clicked
+     * @returns {boolean} - returns false if the same text is present on the page
+     */
+    function isArticleChanged(thisSelector, otherSelector){
+        var result = false;
         cy.get(thisSelector).then((title) => {
             var before = title.text();
             cy.get(otherSelector).click();
             cy.get(thisSelector).then((title) => {
                 var after = title.text();
-                assert.equal(before, after);
+                result = !(before === after);
             });
         });
+        return result;
     };
 
 });

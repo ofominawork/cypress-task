@@ -78,6 +78,7 @@ describe('TOC tree navigation test', () => {
 
     /* children tests */
 
+
     /**
      * @P1
      * At the moment test compares only the number of expanded children
@@ -85,38 +86,11 @@ describe('TOC tree navigation test', () => {
      * TODO: compare children titles
      */
     it('shows children after TOC item click', () => {
-        var selector = "ul[data-test='toc'] li[data-toc-scroll = 'Getting_started']";
-        cy.get(selector)
-            .as("item").then(() => {
-            cy.get("@item").next().then((nextBefore) => {
-                cy.get("@item").click();
-                cy.get("@item").next().then((nextAfter) => {
-                    cy.get("@item").nextUntil(nextBefore).should('have.length', 9);
-                    assert.equal(nextAfter.text().trim(), 'Overview of the user interface');
-                });
-            });
+        var item = "ul[data-test='toc'] li[data-toc-scroll = 'Getting_started']";
+        verifyChildrenNumber(item, 9, () => {
+            cy.get(item).click()
         });
         //+expected: children titles correspond some document from which TOC is generated
-    });
-
-    /**
-     * @P2
-     * At the moment test compares only the number of expanded children
-     * but it is more correct to compare titles of expanded children as well
-     * TODO: compare children titles
-     */
-    it('shows children after expander click', () => {
-        var selector = "ul[data-test='toc'] li[data-toc-scroll = 'Getting_started']";
-        cy.get(selector)
-            .as("item").then(() => {
-            cy.get("@item").next().then((nextBefore) => {
-                cy.get("@item").children("a").children("svg").click();
-                cy.get("@item").next().then((nextAfter) => {
-                    cy.get("@item").nextUntil(nextBefore).should('have.length', 9);
-                    assert.equal(nextAfter.text().trim(), 'Overview of the user interface');
-                });
-            });
-        });
     });
 
     //@P3
@@ -130,60 +104,47 @@ describe('TOC tree navigation test', () => {
      *  TODO: clarify the behaviour
      */
     it('hides children after TOC item click', () => {
-        var selector = "ul[data-test='toc'] li[data-toc-scroll = 'Getting_started']";
-        cy.get(selector).as("item")
-            .then(() => {
-                cy.get("@item").next().then((before) => {
-                    cy.get("@item").click().click();
-                    //cy.get("@item").click();
-                    cy.get("@item").next().then((after) => {
-                        assert.equal(before.text(), after.text()
-                            , "See comment before test");
-                    });
-                });
-            });
+        var item = "ul[data-test='toc'] li[data-toc-scroll = 'Getting_started']";
+        verifyChildrenNumber(item, 0, () =>{
+            cy.get(item).click().click();
+        });
     });
 
-    //@P3
-    it('shows children after TOC item wo article click', () => {
-        var selector = "ul[data-test='toc'] li[data-toc-scroll = 'd10e258']";
-        cy.get(selector).as("item")
-            .then(() => {
-                cy.get("@item").next().then((before) => {
-                    cy.get("@item").click();
-                    cy.get("@item").next().then((after) => {
-                        cy.get("@item").nextUntil(before).should('have.length', 12);
-                    });
-                });
-            });
-    });
 
-    //@P3
-    it('hides children after TOC item wo article click', () => {
-        var selector = "ul[data-test='toc'] li[data-toc-scroll = 'd10e258']";
-        cy.get(selector).as("item")
-            .then(() => {
-                cy.get("@item").next().then((before) => {
-                    cy.get("@item").click().click();
-                    //cy.get("@item").click();
-                    cy.get("@item").next().then((after) => {
-                        assert.equal(before.text(), after.text());
-                    });
-                });
-            });
+    /**
+     * @P2
+     * At the moment test compares only the number of expanded children
+     * but it is more correct to compare titles of expanded children as well
+     * TODO: compare children titles
+     */
+    it('shows children after expander click', () => {
+        var item = "ul[data-test='toc'] li[data-toc-scroll = 'Getting_started']";
+        verifyChildrenNumber(item, 9, () => {
+            cy.get(item).children("a").children("svg").click();
+        });
     });
 
     //@P2
     it('hides children after expander click', () => {
-        cy.get("ul[data-test='toc'] li[data-toc-scroll = 'Getting_started']")
-            .as("item").then(() => {
-            cy.get("@item").next().then((nextBefore) => {
-                cy.get("@item").children("a").children("svg").click().click();
-                cy.get("@item").next().then((nextAfter) => {
-                    cy.get("@item").nextUntil(nextBefore).should('have.length', 0);
-                    assert.equal(nextAfter.text(), nextBefore.text());
-                });
-            });
+        var item = "ul[data-test='toc'] li[data-toc-scroll = 'Getting_started']";
+        verifyChildrenNumber(item,0, () => {
+            cy.get(item).children("a").children("svg").click().click();
+        });
+    });
+
+    //@P3
+    it('shows children after TOC item wo article click', () => {
+        var item = "ul[data-test='toc'] li[data-toc-scroll = 'd10e258']";
+        verifyChildrenNumber(item, 12, () =>{
+            cy.get(item).click();
+        });
+    });
+
+    //@P3
+    it('hides children after TOC item wo article click', () => {
+        var item = "ul[data-test='toc'] li[data-toc-scroll = 'd10e258']"
+        verifyChildrenNumber(item, 0, () => {
+            cy.get(item).click().click();
         });
     });
 
@@ -263,7 +224,6 @@ describe('TOC tree navigation test', () => {
     });
 
 
-
     //@P3
     it('closes expander after expander click', () => {
         cy.get("ul[data-test='toc'] li[data-toc-scroll='Getting_started'] a svg")
@@ -273,7 +233,6 @@ describe('TOC tree navigation test', () => {
                 , "wt-icon wt-icon_size_xs toc-icon");
         });
     });
-
 
 
     /**
@@ -418,12 +377,12 @@ describe('TOC tree navigation test', () => {
     /* functions */
 
     /**
-     * Change of article is verified by not presence of the same text on the page
+     * Change of article is verified by absence of the same text on the page
      * @param thisSelector - selector of element which should be checked for presence
      * @param otherSelector - selector of element which should be clicked
      * @returns {boolean} - returns false if the same text is present on the page
      */
-    function isArticleChanged(thisSelector, otherSelector){
+    function isArticleChanged(thisSelector, otherSelector) {
         var result = false;
         cy.get(thisSelector).then((title) => {
             var before = title.text();
@@ -434,6 +393,20 @@ describe('TOC tree navigation test', () => {
             });
         });
         return result;
-    };
+    }
 
+    /**
+     * The number of expanded children is calculated and compared to childrenNumber param
+     * @param parentSelector - selector of the parent item in TOC
+     * @param childrenNumber - the number of children of parent item in TOC
+     * @param action - action (e.g. click)
+     */
+
+    function verifyChildrenNumber(parentSelector, childrenNumber, action) {
+        cy.get(parentSelector).next().then((nextParent) => {
+            action();
+            cy.get(parentSelector).nextUntil(nextParent)
+                .should('have.length', childrenNumber);
+        });
+    }
 });

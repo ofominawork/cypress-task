@@ -37,7 +37,7 @@ describe('TOC tree navigation test', () => {
         //precondition: https://www.jetbrains.com/help/idea/installation-guide.html is opened
         //step1: click all TOC items
         //expected:
-        // - all TOC items are expanded
+        // - all TOC items children are expanded
         // - all titles of TOC items correspond the document from which TOC was generated
         // - indents are correct
         // - items can be scrolled
@@ -50,7 +50,7 @@ describe('TOC tree navigation test', () => {
      * @P1
      *  TODO: investigate if there is a better way to work with timeouts (see wait)
      */
-    it('shows article', () => {
+    it("shows article", () => {
         var item = "ul[data-test='toc'] li[data-toc-scroll='Getting_started']";
         var header = "h1 span span.article__title";
         cy.get(item).click();
@@ -61,43 +61,20 @@ describe('TOC tree navigation test', () => {
     });
 
     //@P2
-    it('shows previous article', () => {
-        var selector = "ul[data-test='toc'] li[data-toc-scroll='d10e258']";
-        cy.get(selector).click();
-        cy.get('h1 span span.article__title').then((sp) => {
-            assert.equal(sp.text(), "Install IntelliJ IDEA");
-        });
+    it("checks article after TOC wo article click", () => {
+        var header = "h1 span span.article__title";
+        var item = "ul[data-test='toc'] li[data-toc-scroll='d10e258']";
+        elementNotChanged(header, item);
     });
 
     //@P3
-    it('checks article after expander-icon closed', () => {
+    it('checks article after expander click', () => {
         var header = "h1 span span.article__title";
-        var selector = "ul[data-test='toc'] li[data-toc-scroll='Getting_started'] a svg";
-        cy.get(header).then((sp) => {
-            var before = sp.text();
-            cy.get(selector)
-                .click().click();
-            cy.get(header).then((sp1) => {
-                var after = sp1.text();
-                assert.equal(before, after);
-            });
-        });
+        var expander = "ul[data-test='toc'] li[data-toc-scroll='Getting_started'] a svg";
+        elementNotChanged(header, expander);
+        elementNotChanged(header, expander);
     });
 
-    //@P3
-    it('checks article after expander-icon opened', () => {
-        var selector = "ul[data-test='toc'] li[data-toc-scroll='Getting_started'] a svg";
-        var header = "h1 span span.article__title";
-        cy.get(header).then((titleBefore) => {
-            var before = titleBefore.text();
-            cy.get(selector)
-                .click();
-            cy.get(header).then((titleAfter) => {
-                var after = titleAfter.text();
-                assert.equal(before, after);
-            });
-        });
-    });
 
     /* children tests */
 
@@ -115,6 +92,7 @@ describe('TOC tree navigation test', () => {
                 cy.get("@item").click();
                 cy.get("@item").next().then((nextAfter) => {
                     cy.get("@item").nextUntil(nextBefore).should('have.length', 9);
+                    assert.equal(nextAfter.text().trim(), 'Overview of the user interface');
                 });
             });
         });
@@ -208,6 +186,7 @@ describe('TOC tree navigation test', () => {
             });
         });
     });
+
 
     /* font tests */
 
@@ -436,5 +415,17 @@ describe('TOC tree navigation test', () => {
     });
 
 
+    /* functions */
+
+    function elementNotChanged(thisSelector, otherSelector){
+        cy.get(thisSelector).then((title) => {
+            var before = title.text();
+            cy.get(otherSelector).click();
+            cy.get(thisSelector).then((title) => {
+                var after = title.text();
+                assert.equal(before, after);
+            });
+        });
+    };
 
 });

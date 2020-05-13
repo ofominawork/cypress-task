@@ -3,6 +3,9 @@ describe('TOC tree navigation test', () => {
     //TODO: Refactor
     //TODO: Think about better titles of tests
     //TODO: Think on adding tests like expand children ->items which were displayed are still displayed
+    //TODO: Expander class is checked (see expander icon tests) to verify it is opened-closed,
+    // but the class itself is not checked (should be checked manually by watching)
+    //TODO: think about making variables item, link, expander, header common for all tests
 
     beforeEach(() => {
         cy.visit('https://www.jetbrains.com/help/idea/installation-guide.html');
@@ -154,30 +157,34 @@ describe('TOC tree navigation test', () => {
 
     //@P2
     it('checks font of non-selected TOC item', () => {
-        var item = "ul[data-test='toc'] li[data-toc-scroll = 'Getting_started'] a";
-        verifyFont(item, "toc-item","400");
+        var link = "ul[data-test='toc'] li[data-toc-scroll = 'Getting_started'] a";
+        verifyClass(link, "toc-item");
+        verifyFont(link,"400");
     });
 
     //@P2
     it('checks font of selected TOC item with article', () => {
-        var item = "ul[data-test='toc'] li[data-toc-scroll = 'Getting_started'] a";
-        cy.get(item).click();
-        verifyFont(item,"toc-item toc-item--selected", "700" );
+        var link = "ul[data-test='toc'] li[data-toc-scroll = 'Getting_started'] a";
+        cy.get(link).click();
+        verifyClass(link, "toc-item toc-item--selected" );
+        verifyFont(link,"700" );
     });
 
     //@P3
     it('checks font of TOC item wo article after click', () => {
         var item = "ul[data-test='toc'] li[data-toc-scroll = 'd10e258'] a";
         cy.get(item).click();
-        verifyFont(item, "toc-item", "400" )
+        verifyClass(item,"toc-item" );
+        verifyFont(item, "400" );
     });
 
      //@P3
     it('checks font of TOC item after expander click', () => {
-        var item = "ul[data-test='toc'] li[data-toc-scroll = 'Getting_started'] a";
+        var link = "ul[data-test='toc'] li[data-toc-scroll = 'Getting_started'] a";
         for (var i = 0; i < 2; i++) {
-            cy.get(item).children("svg").click();
-            verifyFont(item, "toc-item", "400");
+            cy.get(link).children("svg").click();
+            verifyClass(link, "toc-item");
+            verifyFont(link, "400");
         }
 
 
@@ -198,48 +205,35 @@ describe('TOC tree navigation test', () => {
     /* expander icon tests */
 
     //@P3
-    //try
     it('opens expander after expander click', () => {
-        var selector = "ul[data-test='toc'] li[data-toc-scroll='Getting_started'] a svg";
-        cy.get(selector)
-            .as("item").then(() => {
-            cy.get("@item").click();
-            cy.get("@item").should('have.class'
-                , "wt-icon wt-icon_size_xs toc-icon toc-icon--opened");
-        });
+        var expander = "ul[data-test='toc'] li[data-toc-scroll='Getting_started'] a svg";
+        cy.get(expander).click();
+        verifyClass(expander, "wt-icon wt-icon_size_xs toc-icon toc-icon--opened");
     });
 
 
     //@P3
     it('closes expander after expander click', () => {
-        cy.get("ul[data-test='toc'] li[data-toc-scroll='Getting_started'] a svg")
-            .as("item").then(() => {
-            cy.get("@item").click().click();
-            cy.get("@item").should('have.class'
-                , "wt-icon wt-icon_size_xs toc-icon");
-        });
+        var expander = "ul[data-test='toc'] li[data-toc-scroll='Getting_started'] a svg";
+        cy.get(expander).click().click();
+        verifyClass(expander, "wt-icon wt-icon_size_xs toc-icon");
     });
 
 
-    /**
-     * @P3
-     * @Automate
-     */
+    //@P2
     it('opens expander after TOC item click', () => {
-        //precondition: https://www.jetbrains.com/help/idea/installation-guide.html is opened
-        //step1: click on the text of any TOC item
-        //expected: expand-collapse icon has opened state
+        var item = "ul[data-test='toc'] li[data-toc-scroll='Getting_started']";
+        var expander = item + " a svg";
+        cy.get(item).click();
+        verifyClass(expander, "wt-icon wt-icon_size_xs toc-icon toc-icon--opened");
     });
 
-    /**
-     * @P3
-     * @Automate
-     */
+    //@P2
     it('closes expander after TOC item click', () => {
-        //precondition: https://www.jetbrains.com/help/idea/installation-guide.html is opened
-        //step1: click on the text of any TOC item
-        //step2: click on the text of the same TOC item
-        //expected: expand-collapse icon has default state
+        var item = "ul[data-test='toc'] li[data-toc-scroll='Getting_started']";
+        var expander = item + " a svg";
+        cy.get(item).click().click();
+        verifyClass(expander, "wt-icon wt-icon_size_xs toc-icon");
     });
 
 
@@ -397,15 +391,25 @@ describe('TOC tree navigation test', () => {
     }
 
     /**
-     *
-     * @param selector
-     * @param fontWeight
+     * Font weight of the element is verified
+     * @param selector - css selector of element in DOM for which the font is verified
+     * @param fontWeight - font-weight of element in DOM
      */
-    function verifyFont(selector, className, fontWeight) {
+    function verifyFont(selector, fontWeight) {
         cy
             .get(selector)
-            .should("have.class", className)
-            .and('have.css', 'font-weight')
+            .should('have.css', 'font-weight')
             .and('eq', fontWeight);
+    }
+
+    /**
+     * Class name of the element in DOM is verified
+     * @param selector - element css selector in DOM
+     * @param className - class name of element in DOM
+     */
+    function verifyClass(selector, className) {
+        cy
+            .get(selector)
+            .should("have.class", className);
     }
 });

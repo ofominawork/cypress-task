@@ -6,6 +6,10 @@ describe('TOC tree navigation test', () => {
     //TODO: Expander class is checked (see expander icon tests) to verify it is opened-closed,
     // but the class itself is not checked (should be checked manually by watching)
     //TODO: think about making variables item, link, expander, header common for all tests
+    //TODO: think about making tests: if has expander than has children, else doesn't have children
+    //TODO: indent should be checked for all expanded children (add tests)
+
+
 
     beforeEach(() => {
         cy.visit('https://www.jetbrains.com/help/idea/installation-guide.html');
@@ -306,46 +310,39 @@ describe('TOC tree navigation test', () => {
     /* indent tests */
 
     //@P3
-    //TODO: indent should be checked for all first level items
     it('checks first level indent', () => {
-        cy.get("ul[data-test='toc'] li[data-toc-scroll='Getting_started'] a")
-            .should('have.attr', "style")
-            .and("eq", "padding-left: 16px;");
+        var item = "ul[data-test='toc'] li[data-toc-scroll='Getting_started']";
+        verifyIndent(1, () => {
+            return cy.get(item).children("a");
+        })
+
     });
 
     //@P3
-    //TODO: indent should be checked for all expanded children
     it('checks second level indent', () => {
-        cy.get("ul[data-test='toc'] li[data-toc-scroll='Getting_started']").click().next()
-            .children("a")
-            .should('have.attr', "style")
-            .and("eq", "padding-left: 32px;");
+        var item = "ul[data-test='toc'] li[data-toc-scroll='Getting_started']";
+        verifyIndent(2, () => {
+            return cy.get(item).click().next().children("a");
+        })
     });
 
     //@P3
-    //TODO: indent should be checked for all expanded children
     it('checks third level indent', () => {
-        cy.get("ul[data-test='toc'] li[data-toc-scroll='Configuring_Project_and_IDE_Settings']")
-            .click().next().click().next()
-            .children("a")
-            .should('have.attr', "style")
-            .and("eq", "padding-left: 48px;");
+        var item = "ul[data-test='toc'] li[data-toc-scroll='Configuring_Project_and_IDE_Settings']";
+        verifyIndent(3, () => {
+            return cy.get(item).click().next().click().next().children("a");
+        });
     });
 
     //@P3
-    //TODO: indent should be checked for all expanded children
     it('checks fourth level indent', () => {
-        cy.get("ul[data-test='toc'] li[data-toc-scroll='Configuring_Project_and_IDE_Settings']")
-            .click().next().click().next().click().next()
-            .children("a")
-            .should('have.attr', "style")
-            .and("eq", "padding-left: 64px;");
+        var item = "ul[data-test='toc'] li[data-toc-scroll='Configuring_Project_and_IDE_Settings']";
+        verifyIndent(4, () => {
+            return cy.get(item).click().next().click().next().click().next().children("a")
+        });
     });
 
-    /**
-     * @P3
-     * @Automate
-     */
+    //@P3
     it('checks fifth level indent', () => {
         //precondition: https://www.jetbrains.com/help/idea/installation-guide.html is opened
         //step1: Expand Non-JVM Technologies -> PHP -> Debug PHP applications
@@ -411,5 +408,11 @@ describe('TOC tree navigation test', () => {
         cy
             .get(selector)
             .should("have.class", className);
+    }
+
+    function verifyIndent(level, action) {
+        action()
+            .should('have.attr', "style")
+            .and("eq", "padding-left: "+level*16 +"px;");
     }
 });

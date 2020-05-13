@@ -2,6 +2,7 @@ describe('TOC tree navigation test', () => {
     //TODO: change "Getting started" item in tests to different items from TOC
     //TODO: Refactor
     //TODO: Think about better titles of tests
+    //TODO: Think on adding tests like expand children ->items which were displayed are still displayed
 
     beforeEach(() => {
         cy.visit('https://www.jetbrains.com/help/idea/installation-guide.html');
@@ -151,50 +152,35 @@ describe('TOC tree navigation test', () => {
 
     /* font tests */
 
-    /**
-     * @P2
-     * Checks that the font becomes bold
-     * after TOC item is clicked and corresponding article is displayed
-     * question: is checking the style enough?
-     * TODO: leave only one check either by font-weight or by style
-     */
-    it('checks font after TOC item click', () => {
-        var selector = "ul[data-test='toc'] li[data-toc-scroll = 'Getting_started'] a";
-        cy.get(selector).as("item")
-            .then(() => {
-                cy.get("@item").should("have.class", "toc-item");
-                cy.get("@item").should('have.css', 'font-weight')
-                    .and('eq', "400");
-                cy.get("@item").click();
-                cy.get("@item").should("have.class", "toc-item toc-item--selected");
-                cy.get("@item").should('have.css', 'font-weight')
-                    .and('eq', "700");
-            });
+    //@P2
+    it('checks font of non-selected TOC item', () => {
+        var item = "ul[data-test='toc'] li[data-toc-scroll = 'Getting_started'] a";
+        verifyFont(item, "toc-item","400");
+    });
+
+    //@P2
+    it('checks font of selected TOC item with article', () => {
+        var item = "ul[data-test='toc'] li[data-toc-scroll = 'Getting_started'] a";
+        cy.get(item).click();
+        verifyFont(item,"toc-item toc-item--selected", "700" );
     });
 
     //@P3
-    it('checks font after TOC item wo article click', () => {
-        var selector = "ul[data-test='toc'] li[data-toc-scroll = 'd10e258'] a";
-        cy.get(selector).as("item")
-            .then(() => {
-                cy.get("@item").should("have.class", "toc-item");
-                cy.get("@item").should('have.css', 'font-weight')
-                    .and('eq', "400");
-                cy.get("@item").click();
-                cy.get("@item").should("have.class", "toc-item");
-                cy.get("@item").should('have.css', 'font-weight')
-                    .and('eq', "400");
-            });
+    it('checks font of TOC item wo article after click', () => {
+        var item = "ul[data-test='toc'] li[data-toc-scroll = 'd10e258'] a";
+        cy.get(item).click();
+        verifyFont(item, "toc-item", "400" )
     });
 
-    /**
-     * @P3
-     * @Automate
-     */
-    it('checks font after expander-icon click', () => {
-        //precondition: https://www.jetbrains.com/help/idea/installation-guide.html is opened
-        //step1: click on expander icon left to any TOC item (different from /installation-guide.html)
-        //expected: TOC item font doesn't change
+     //@P3
+    it('checks font of TOC item after expander click', () => {
+        var item = "ul[data-test='toc'] li[data-toc-scroll = 'Getting_started'] a";
+        for (var i = 0; i < 2; i++) {
+            cy.get(item).children("svg").click();
+            verifyFont(item, "toc-item", "400");
+        }
+
+
     });
 
     /* hover tests */
@@ -205,7 +191,7 @@ describe('TOC tree navigation test', () => {
      */
     it('checks hover', () => {
         //precondition: https://www.jetbrains.com/help/idea/installation-guide.html is opened
-        //step1: put the mouse over the element in TOC
+        //step1: put the mouse over any element in TOC
         //expected: grey hover is displayed over the element
     });
 
@@ -408,5 +394,18 @@ describe('TOC tree navigation test', () => {
             cy.get(parentSelector).nextUntil(nextParent)
                 .should('have.length', childrenNumber);
         });
+    }
+
+    /**
+     *
+     * @param selector
+     * @param fontWeight
+     */
+    function verifyFont(selector, className, fontWeight) {
+        cy
+            .get(selector)
+            .should("have.class", className)
+            .and('have.css', 'font-weight')
+            .and('eq', fontWeight);
     }
 });

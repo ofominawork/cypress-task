@@ -1,7 +1,6 @@
 describe('TOC tree navigation test', () => {
-    //TODO: change "Getting started" item in tests to different items from TOC
     //TODO: Refactor
-    //TODO: Think about better titles of tests
+    //TODO: change "Getting started" item in tests to different items from TOC
     //TODO: Think on adding tests like expand children ->items which were displayed are still displayed
     //TODO: Expander class is checked (see expander icon tests) to verify it is opened-closed,
     // but the class itself is not checked (should be checked manually by watching)
@@ -311,14 +310,20 @@ describe('TOC tree navigation test', () => {
 
     //@P3
     it('checks first level indent', () => {
-        var item = "ul[data-test='toc'] li[data-toc-scroll='Getting_started']";
-        verifyIndent(1, () => {
-            return cy.get(item).children("a");
-        })
-
+        //closes elements of the second level which are opened automatically
+        cy.get("ul[data-test='toc'] li[data-toc-scroll = 'Installation_guide'] a svg").click();
+        cy.get("ul[data-test='toc'] li[data-toc-scroll] a")
+            .then((ms) =>{
+                for (let i=0; i<ms.length; i++){
+                    verifyIndent(1, () => {
+                        return cy.wrap(ms.eq(i));
+                    });
+                }
+            });
     });
 
     //@P3
+    //TODO: check indent of all children
     it('checks second level indent', () => {
         var item = "ul[data-test='toc'] li[data-toc-scroll='Getting_started']";
         verifyIndent(2, () => {
@@ -327,6 +332,7 @@ describe('TOC tree navigation test', () => {
     });
 
     //@P3
+    //TODO: check indent of all children
     it('checks third level indent', () => {
         var item = "ul[data-test='toc'] li[data-toc-scroll='Configuring_Project_and_IDE_Settings']";
         verifyIndent(3, () => {
@@ -335,6 +341,7 @@ describe('TOC tree navigation test', () => {
     });
 
     //@P3
+    //TODO: check indent of all children
     it('checks fourth level indent', () => {
         var item = "ul[data-test='toc'] li[data-toc-scroll='Configuring_Project_and_IDE_Settings']";
         verifyIndent(4, () => {
@@ -343,13 +350,13 @@ describe('TOC tree navigation test', () => {
     });
 
     //@P3
+    //TODO: check indent of all children
     it('checks fifth level indent', () => {
         //precondition: https://www.jetbrains.com/help/idea/installation-guide.html is opened
         //step1: Expand Non-JVM Technologies -> PHP -> Debug PHP applications
         // -> Configure a debugging engine -> Configure Xdebug
         //expected: check that left indent = 80px
     });
-
 
     /* functions */
 
@@ -410,6 +417,11 @@ describe('TOC tree navigation test', () => {
             .should("have.class", className);
     }
 
+    /**
+     *
+     * @param level - level in TOC
+     * @param action - action to proceed to level
+     */
     function verifyIndent(level, action) {
         action()
             .should('have.attr', "style")

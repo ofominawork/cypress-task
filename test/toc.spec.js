@@ -352,11 +352,18 @@ describe('TOC tree navigation test', () => {
     });
 
     //@P3
-    //TODO: check indent of all children
     it('checks fourth level indent', () => {
         var item = "ul[data-test='toc'] li[data-toc-scroll='Configuring_Project_and_IDE_Settings']";
-        verifyIndent(4, () => {
-            return cy.get(item).click().next().click().next().click().next().children("a")
+        cy.get(item).click().next().click().next().next()
+            .then((nextParent) => {
+            cy.get(item).next().next().click().nextUntil(nextParent)
+                .then((children) => {
+                for (let i = 0; i < children.length; i++) {
+                    verifyIndent(4, () => {
+                        return cy.wrap(children.eq(i)).find("a");
+                    });
+                }
+            });
         });
     });
 

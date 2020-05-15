@@ -6,7 +6,7 @@ describe('TOC tree navigation test', () => {
     // but the class itself is not checked (should be checked manually by watching)
     //TODO: think about making variables item, link, expander, header common for all tests
     //TODO: think about making tests: if has expander than has children, else doesn't have children
-    //TODO: indent should be checked for all expanded children (add tests)
+    //TODO: indent should be checked for all expanded children (see TODO before tests)
 
 
 
@@ -68,7 +68,7 @@ describe('TOC tree navigation test', () => {
     });
 
     //@P2
-    it("checks article after TOC wo article click", () => {
+    it("checks article after TOC item wo article click", () => {
         var header = "h1 span span.article__title";
         var item = "ul[data-test='toc'] li[data-toc-scroll='d10e258']";
         assert.isFalse(isArticleChanged(header, item));
@@ -312,7 +312,8 @@ describe('TOC tree navigation test', () => {
     it('checks first level indent', () => {
         //closes elements of the second level which are opened automatically
         cy.get("ul[data-test='toc'] li[data-toc-scroll = 'Installation_guide'] a svg").click();
-        cy.get("ul[data-test='toc'] li[data-toc-scroll] a")
+        var link = "ul[data-test='toc'] li[data-toc-scroll] a";
+        cy.get(link)
             .then((ms) =>{
                 for (let i=0; i<ms.length; i++){
                     verifyIndent(1, () => {
@@ -323,12 +324,18 @@ describe('TOC tree navigation test', () => {
     });
 
     //@P3
-    //TODO: check indent of all children
     it('checks second level indent', () => {
         var item = "ul[data-test='toc'] li[data-toc-scroll='Getting_started']";
-        verifyIndent(2, () => {
-            return cy.get(item).click().next().children("a");
-        })
+        cy.get(item).next().then((nextParent) => {
+            cy.get(item).click();
+            cy.get(item).nextUntil(nextParent).then((children) => {
+                for (let i = 0; i < children.length; i++) {
+                    verifyIndent(2, () => {
+                        return cy.wrap(children.eq(i)).find("a");
+                    });
+                }
+            });
+        });
     });
 
     //@P3

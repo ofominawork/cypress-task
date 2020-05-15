@@ -327,8 +327,7 @@ describe('TOC tree navigation test', () => {
     it('checks second level indent', () => {
         var item = "ul[data-test='toc'] li[data-toc-scroll='Getting_started']";
         cy.get(item).next().then((nextParent) => {
-            cy.get(item).click();
-            cy.get(item).nextUntil(nextParent).then((children) => {
+            cy.get(item).click().nextUntil(nextParent).then((children) => {
                 for (let i = 0; i < children.length; i++) {
                     verifyIndent(2, () => {
                         return cy.wrap(children.eq(i)).find("a");
@@ -339,11 +338,16 @@ describe('TOC tree navigation test', () => {
     });
 
     //@P3
-    //TODO: check indent of all children
     it('checks third level indent', () => {
         var item = "ul[data-test='toc'] li[data-toc-scroll='Configuring_Project_and_IDE_Settings']";
-        verifyIndent(3, () => {
-            return cy.get(item).click().next().click().next().children("a");
+        cy.get(item).click().next().next().then((nextParent) => {
+            cy.get(item).next().click().nextUntil(nextParent).then((children) => {
+                for (let i = 0; i < children.length; i++) {
+                    verifyIndent(3, () => {
+                        return cy.wrap(children.eq(i)).find("a");
+                    });
+                }
+            });
         });
     });
 
@@ -358,6 +362,7 @@ describe('TOC tree navigation test', () => {
 
     //@P3
     //TODO: check indent of all children
+    //@Automate
     it('checks fifth level indent', () => {
         //precondition: https://www.jetbrains.com/help/idea/installation-guide.html is opened
         //step1: Expand Non-JVM Technologies -> PHP -> Debug PHP applications

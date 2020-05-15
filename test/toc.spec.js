@@ -6,8 +6,6 @@ describe('TOC tree navigation test', () => {
     // but the class itself is not checked (should be checked manually by watching)
     //TODO: think about making variables item, link, expander, header common for all tests
     //TODO: think about making tests: if has expander than has children, else doesn't have children
-    //TODO: indent should be checked for all expanded children (see TODO before tests)
-
 
 
     beforeEach(() => {
@@ -169,7 +167,7 @@ describe('TOC tree navigation test', () => {
     it('checks font of selected TOC item with article', () => {
         var link = "ul[data-test='toc'] li[data-toc-scroll = 'Getting_started'] a";
         cy.get(link).click();
-        verifyClass(link, "toc-item toc-item--selected" );
+        verifyClass(link, "toc-item toc-item--selected");
         verifyFont(link,"700" );
     });
 
@@ -281,39 +279,15 @@ describe('TOC tree navigation test', () => {
         //- TOC item font is bold (selected) (if TOC item has article)
         //- the corresponding article is shown (if TOC item has article)
     });
-
-
-    /* double click tests */
-
-    /**
-     * @P3
-     * @Automate
-     */
-    it('checks double click on TOC item', () => {
-        //precondition: https://www.jetbrains.com/help/idea/installation-guide.html is opened
-        //step1: doubleclick on TOC item
-        //expected: corresponding article is opened, expander icon has default state
-    });
-
-    /**
-     * @P3
-     * @Automate
-     */
-    it('checks double click on expander-icon', () => {
-        //precondition: https://www.jetbrains.com/help/idea/installation-guide.html is opened
-        //step1: doubleclick on expander
-        //expected: expander icon has default state
-    });
-
-
+    
     /* indent tests */
 
     //@P3
     it('checks first level indent', () => {
         //closes elements of the second level which are opened automatically
+        var items = "ul[data-test='toc'] li[data-toc-scroll]";
         cy.get("ul[data-test='toc'] li[data-toc-scroll = 'Installation_guide'] a svg").click();
-        var item = "ul[data-test='toc'] li[data-toc-scroll]";
-        cy.get(item)
+        cy.get(items)
             .then((children) =>{
                 verifyIndent(1,children);
             });

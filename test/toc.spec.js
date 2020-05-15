@@ -312,59 +312,35 @@ describe('TOC tree navigation test', () => {
     it('checks first level indent', () => {
         //closes elements of the second level which are opened automatically
         cy.get("ul[data-test='toc'] li[data-toc-scroll = 'Installation_guide'] a svg").click();
-        var link = "ul[data-test='toc'] li[data-toc-scroll] a";
-        cy.get(link)
-            .then((ms) =>{
-                for (let i=0; i<ms.length; i++){
-                    verifyIndent(1, () => {
-                        return cy.wrap(ms.eq(i));
-                    });
-                }
+        var item = "ul[data-test='toc'] li[data-toc-scroll]";
+        cy.get(item)
+            .then((children) =>{
+                verifyIndent(1,children);
             });
     });
 
     //@P3
     it('checks second level indent', () => {
         var item = "ul[data-test='toc'] li[data-toc-scroll='Getting_started']";
-        cy.get(item).next().then((nextParent) => {
-            cy.get(item).click().nextUntil(nextParent).then((children) => {
-                for (let i = 0; i < children.length; i++) {
-                    verifyIndent(2, () => {
-                        return cy.wrap(children.eq(i)).find("a");
-                    });
-                }
-            });
-        });
+        verifyIndentForSiblings(2
+            , () => {return cy.get(item).next();}
+            , () => {return cy.get(item).click();});
     });
 
     //@P3
     it('checks third level indent', () => {
         var item = "ul[data-test='toc'] li[data-toc-scroll='Configuring_Project_and_IDE_Settings']";
-        cy.get(item).click().next().next().then((nextParent) => {
-            cy.get(item).next().click().nextUntil(nextParent).then((children) => {
-                for (let i = 0; i < children.length; i++) {
-                    verifyIndent(3, () => {
-                        return cy.wrap(children.eq(i)).find("a");
-                    });
-                }
-            });
-        });
+        verifyIndentForSiblings(3
+            ,() => {return cy.get(item).click().next().next(); }
+            ,() => {return cy.get(item).next().click();});
     });
 
     //@P3
     it('checks fourth level indent', () => {
         var item = "ul[data-test='toc'] li[data-toc-scroll='Configuring_Project_and_IDE_Settings']";
-        cy.get(item).click().next().click().next().next()
-            .then((nextParent) => {
-            cy.get(item).next().next().click().nextUntil(nextParent)
-                .then((children) => {
-                for (let i = 0; i < children.length; i++) {
-                    verifyIndent(4, () => {
-                        return cy.wrap(children.eq(i)).find("a");
-                    });
-                }
-            });
-        });
+        verifyIndentForSiblings(4
+            ,() => {return cy.get(item).click().next().click().next().next();}
+            ,() => {return cy.get(item).next().next().click(); })
     });
 
     //@P3
@@ -438,12 +414,31 @@ describe('TOC tree navigation test', () => {
 
     /**
      *
-     * @param level - level in TOC
-     * @param action - action to proceed to level
+     * @param level - level of item in TOC
+     * @param siblings - the list of items of the same level
      */
-    function verifyIndent(level, action) {
-        action()
-            .should('have.attr', "style")
-            .and("eq", "padding-left: "+level*16 +"px;");
+    function verifyIndent(level, siblings) {
+        for (let i = 0; i < siblings.length; i++) {
+            cy.wrap(siblings.eq(i)).find("a")
+                .should('have.attr', "style")
+                .and("eq", "padding-left: " + level * 16 + "px;");
+        }
+    }
+
+    /**
+     *
+     * @param level - level of item in TOC
+     * @param actionsToNextParent - actions to find next parent on level previous to desired
+     * @param actionsToLevel - actions to proceed to desired level in TOC
+     */
+
+    function verifyIndentForSiblings(level, actionsToNextParent, actionsToLevel){
+        actionsToNextParent()
+            .then((nextParent) => {
+                actionsToLevel().nextUntil(nextParent)
+                    .then((siblings) => {
+                        verifyIndent(level, siblings);
+                        });
+            });
     }
 });
